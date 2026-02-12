@@ -95,6 +95,58 @@ CONSULTANCIES = [
         "domain": "cognizant.com",
         "careers_url": "https://careers.cognizant.com",
     },
+    # ── Batch 2 ──
+    {
+        "name": "Capgemini",
+        "domain": "capgemini.com",
+        "careers_url": "https://www.capgemini.com/careers/",
+    },
+    {
+        "name": "Infosys",
+        "domain": "infosys.com",
+        "careers_url": "https://www.infosys.com/careers/",
+    },
+    {
+        "name": "KPMG",
+        "domain": "kpmg.com",
+        "careers_url": "https://kpmg.com/us/en/careers.html",
+    },
+    {
+        "name": "EY (Ernst & Young)",
+        "domain": "ey.com",
+        "careers_url": "https://www.ey.com/en_us/careers",
+    },
+    {
+        "name": "Wipro",
+        "domain": "wipro.com",
+        "careers_url": "https://careers.wipro.com/",
+    },
+    # ── Batch 3 ──
+    {
+        "name": "TCS (Tata Consultancy Services)",
+        "domain": "tcs.com",
+        "careers_url": "https://www.tcs.com/careers",
+    },
+    {
+        "name": "PwC",
+        "domain": "pwc.com",
+        "careers_url": "https://www.pwc.com/us/en/careers.html",
+    },
+    {
+        "name": "Booz Allen Hamilton",
+        "domain": "bah.com",
+        "careers_url": "https://www.boozallen.com/careers.html",
+    },
+    {
+        "name": "HCL Technologies",
+        "domain": "hcltech.com",
+        "careers_url": "https://www.hcltech.com/careers",
+    },
+    {
+        "name": "West Monroe",
+        "domain": "westmonroe.com",
+        "careers_url": "https://www.westmonroe.com/careers",
+    },
 ]
 
 # Job titles to search for — people involved in IT/CS hiring
