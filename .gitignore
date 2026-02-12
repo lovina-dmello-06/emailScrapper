@@ -1,0 +1,10 @@
+# Search cache (local state)
+.search_cache.json
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Generated output (optional — uncomment to track the Excel)
+# Bay_Area_IT_Consultancies_Contacts.xlsx
