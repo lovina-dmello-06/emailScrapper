@@ -147,6 +147,32 @@ CONSULTANCIES = [
         "domain": "westmonroe.com",
         "careers_url": "https://www.westmonroe.com/careers",
     },
+    # ── Batch 4 (IT dept only — final 5 credits) ──
+    {
+        "name": "IBM Consulting",
+        "domain": "ibm.com",
+        "careers_url": "https://www.ibm.com/careers",
+    },
+    {
+        "name": "Thoughtworks",
+        "domain": "thoughtworks.com",
+        "careers_url": "https://www.thoughtworks.com/careers",
+    },
+    {
+        "name": "NTT DATA",
+        "domain": "nttdata.com",
+        "careers_url": "https://www.nttdata.com/global/en/careers",
+    },
+    {
+        "name": "CGI Group",
+        "domain": "cgi.com",
+        "careers_url": "https://www.cgi.com/en/careers",
+    },
+    {
+        "name": "Tech Mahindra",
+        "domain": "techmahindra.com",
+        "careers_url": "https://careers.techmahindra.com/",
+    },
 ]
 
 # Job titles to search for — people involved in IT/CS hiring
@@ -577,11 +603,15 @@ def collect_contacts(
     seen: set = None,
     enriched: set = None,
     cache: SearchCache = None,
+    hunter_it_only: bool = False,
 ) -> list:
     """
     Collect contacts from both APIs for all consultancies.
     Merges with existing_contacts and skips already-seen people and
     already-completed searches.
+
+    If hunter_it_only=True, only search the IT department on Hunter
+    (saves credits — 1 per company instead of 3).
     """
     # Start from existing data
     contacts = list(existing_contacts or [])
@@ -791,37 +821,39 @@ def collect_contacts(
                 time.sleep(RATE_LIMIT_DELAY)
 
             # --- HR / Recruiting department ---
-            cache_key_hr = f"hunter|{domain}|hr"
-            if cache.is_done(cache_key_hr):
-                print(f"  [Hunter] HR/recruiting search at {domain}: CACHED (skipping)")
-                skipped_searches += 1
-            elif not hunter.pool.all_exhausted:
-                print(f"  [Hunter] Searching HR/recruiting department at {domain}... "
-                      f"(using {hunter.pool.current_label})")
-                hr_result = hunter.domain_search_recruiting(domain, limit=10)
-                hr_emails = hr_result.get("data", {}).get("emails", [])
-                print(f"  [Hunter] Found {len(hr_emails)} HR/recruiting contacts")
-                process_hunter_emails(hr_emails, "HR/Recruiting")
-                if not hunter.pool.all_exhausted or hr_emails:
-                    cache.mark_done(cache_key_hr)
-                time.sleep(RATE_LIMIT_DELAY)
+            if not hunter_it_only:
+                cache_key_hr = f"hunter|{domain}|hr"
+                if cache.is_done(cache_key_hr):
+                    print(f"  [Hunter] HR/recruiting search at {domain}: CACHED (skipping)")
+                    skipped_searches += 1
+                elif not hunter.pool.all_exhausted:
+                    print(f"  [Hunter] Searching HR/recruiting department at {domain}... "
+                          f"(using {hunter.pool.current_label})")
+                    hr_result = hunter.domain_search_recruiting(domain, limit=10)
+                    hr_emails = hr_result.get("data", {}).get("emails", [])
+                    print(f"  [Hunter] Found {len(hr_emails)} HR/recruiting contacts")
+                    process_hunter_emails(hr_emails, "HR/Recruiting")
+                    if not hunter.pool.all_exhausted or hr_emails:
+                        cache.mark_done(cache_key_hr)
+                    time.sleep(RATE_LIMIT_DELAY)
 
             # --- Management ---
-            cache_key_mgmt = f"hunter|{domain}|management"
-            if cache.is_done(cache_key_mgmt):
-                print(f"  [Hunter] Management search at {domain}: CACHED (skipping)")
-                skipped_searches += 1
-            elif not hunter.pool.all_exhausted:
-                print(f"  [Hunter] Searching management at {domain}... "
-                      f"(using {hunter.pool.current_label})")
-                mgmt_result = hunter.domain_search(domain, department="management",
-                                                    seniority="senior,executive", limit=5)
-                mgmt_emails = mgmt_result.get("data", {}).get("emails", [])
-                print(f"  [Hunter] Found {len(mgmt_emails)} management contacts")
-                process_hunter_emails(mgmt_emails, "Management")
-                if not hunter.pool.all_exhausted or mgmt_emails:
-                    cache.mark_done(cache_key_mgmt)
-                time.sleep(RATE_LIMIT_DELAY)
+            if not hunter_it_only:
+                cache_key_mgmt = f"hunter|{domain}|management"
+                if cache.is_done(cache_key_mgmt):
+                    print(f"  [Hunter] Management search at {domain}: CACHED (skipping)")
+                    skipped_searches += 1
+                elif not hunter.pool.all_exhausted:
+                    print(f"  [Hunter] Searching management at {domain}... "
+                          f"(using {hunter.pool.current_label})")
+                    mgmt_result = hunter.domain_search(domain, department="management",
+                                                        seniority="senior,executive", limit=5)
+                    mgmt_emails = mgmt_result.get("data", {}).get("emails", [])
+                    print(f"  [Hunter] Found {len(mgmt_emails)} management contacts")
+                    process_hunter_emails(mgmt_emails, "Management")
+                    if not hunter.pool.all_exhausted or mgmt_emails:
+                        cache.mark_done(cache_key_mgmt)
+                    time.sleep(RATE_LIMIT_DELAY)
 
         elif hunter and hunter.pool.all_exhausted:
             print(f"\n  [Hunter] Skipping {name} — all Hunter keys exhausted")
@@ -974,6 +1006,8 @@ Where to get keys:
                         help="One or more Hunter.io API keys (space-separated)")
     parser.add_argument("--no-enrich", action="store_true",
                         help="Skip Apollo enrichment (saves credits, no emails from Apollo)")
+    parser.add_argument("--it-only", action="store_true",
+                        help="Hunter: only search IT dept (1 credit/company instead of 3)")
     parser.add_argument("--fresh", action="store_true",
                         help="Clear cache and ignore existing Excel (full fresh run)")
     parser.add_argument("--output", default="Bay_Area_IT_Consultancies_Contacts.xlsx",
@@ -1080,6 +1114,7 @@ Where to get keys:
         seen=seen,
         enriched=enriched,
         cache=cache,
+        hunter_it_only=args.it_only,
     )
 
     total_with_email = len([c for c in contacts if c["email"]])
